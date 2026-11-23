@@ -1,0 +1,1011 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import { 
+  User, Building2, ShieldCheck, PlayCircle, Search, FileText, CheckCircle2, 
+  XCircle, AlertTriangle, Download, Trash2, Eye, Award, Check, Clock, 
+  Wifi, WifiOff, AlertCircle, RefreshCw, Send, Plus, ChevronRight, Filter, 
+  HelpCircle, Lock, Shield, ArrowRight, UploadCloud, Layers, Sparkles, BarChart2,
+  LogIn, UserPlus, Mail, Briefcase, MapPin, GraduationCap, AlertOctagon, MessageSquare, Camera, Heart, ThumbsUp, ThumbsDown, Bell,
+  Globe, Zap, FileCheck, Users, CheckCircle, ArrowUpRight, Home, MessageCircle, Calendar, Monitor, Smartphone, Menu, X
+} from 'lucide-react';
+
+// --- NIGERIAN GEOGRAPHICAL & ACADEMIC REFERENCE DATA ---
+const NIGERIAN_STATES = [
+  "Abia", "Adamawa", "Akwa Ibom", "Anambra", "Bauchi", "Bayelsa", "Benue", "Borno", 
+  "Cross River", "Delta", "Ebonyi", "Edo", "Ekiti", "Enugu", "FCT Abuja", "Gombe", 
+  "Imo", "Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Kogi", "Kwara", "Lagos", 
+  "Nasarawa", "Niger", "Ogun", "Ondo", "Osun", "Oyo", "Plateau", "Rivers", "Sokoto", 
+  "Taraba", "Yobe", "Zamfara"
+];
+
+const GEOPOLITICAL_REGIONS = {
+  "South-West": ["Lagos", "Ogun", "Oyo", "Osun", "Ondo", "Ekiti"],
+  "South-East": ["Abia", "Anambra", "Ebonyi", "Enugu", "Imo"],
+  "South-South": ["Akwa Ibom", "Bayelsa", "Cross River", "Delta", "Edo", "Rivers"],
+  "North-Central": ["Benue", "FCT Abuja", "Kogi", "Kwara", "Nasarawa", "Niger", "Plateau"],
+  "North-West": ["Jigawa", "Kaduna", "Kano", "Katsina", "Kebbi", "Sokoto", "Zamfara"],
+  "North-East": ["Adamawa", "Bauchi", "Borno", "Gombe", "Taraba", "Yobe"]
+};
+
+function getRegionForState(state) {
+  for (const [region, states] of Object.entries(GEOPOLITICAL_REGIONS)) {
+    if (states.includes(state)) return region;
+  }
+  return "South-West";
+}
+
+const UNIVERSITIES = [
+  "University of Lagos (UNILAG)", "Ahmadu Bello University (ABU Zaria)", "University of Ibadan (UI)",
+  "University of Nigeria, Nsukka (UNN)", "Obafemi Awolowo University (OAU)", "Covenant University",
+  "University of Port Harcourt (UNIPORT)", "Rivers State University", "Yaba College of Technology (YABATECH)",
+  "Federal Polytechnic, Nekede", "Federal University of Technology, Minna (FUTMINNA)", "Bayero University Kano (BUK)"
+];
+
+const COURSES = [
+  "Computer Science", "Electrical & Electronic Engineering", "Business Administration",
+  "Accounting & Finance", "Economics", "Mechanical Engineering", "Mass Communication",
+  "Marketing & Sales", "Microbiology", "Law (LL.B)", "Civil Engineering"
+];
+
+// --- SYNTHETIC DATA GENERATORS (100 Candidates & 50 Employers) ---
+function generate100Candidates() {
+  const cands = [];
+  const names = [
+    "Amina Lawal", "Ngozi Eze", "Chinedu Okeke", "Tunde Bakare", "Fatima Abubakar", 
+    "Emeka Nwosu", "Bisi Adebayo", "Yakubu Ibrahim", "Kemi Adeleke", "Olawale Johnson",
+    "Grace Utomi", "Usman Danjuma", "Blessing Okon", "David Alabi", "Zainab Bello"
+  ];
+
+  for (let i = 1; i <= 100; i++) {
+    const name = `${names[(i - 1) % names.length]} ${i > 15 ? `#${i}` : ''}`;
+    const scale = i % 4 === 0 ? 4.0 : 5.0;
+    const cgpa = scale === 5.0 ? (3.2 + ((i * 17) % 18) / 10).toFixed(2) : (2.8 + ((i * 11) % 12) / 10).toFixed(2);
+    const norm = (parseFloat(cgpa) / scale).toFixed(3);
+    const classRank = norm >= 0.90 ? 1 : norm >= 0.70 ? 2 : norm >= 0.50 ? 3 : 4;
+    const classTitle = scale === 5.0 
+      ? (classRank === 1 ? "First Class" : classRank === 2 ? "Second Class Upper (2:1)" : classRank === 3 ? "Second Class Lower (2:2)" : "Third Class")
+      : (classRank === 1 ? "Distinction" : classRank === 2 ? "Upper Credit" : classRank === 3 ? "Lower Credit" : "Pass");
+
+    const isVerified = i % 3 !== 0;
+    const currentState = NIGERIAN_STATES[i % NIGERIAN_STATES.length];
+    const age = 21 + (i % 12);
+
+    cands.push({
+      id: `cand-${1000 + i}`,
+      fullName: name,
+      email: `candidate${i}@example.ng`,
+      phone: `0803${Math.floor(1000700 + i * 99)}`,
+      avatarUrl: null,
+      age: age,
+      currentState: currentState,
+      region: getRegionForState(currentState),
+      currentCity: "Metropolis",
+      openToAnyLocation: i % 2 === 0,
+      preferredStates: [NIGERIAN_STATES[(i + 2) % NIGERIAN_STATES.length], "Lagos"],
+      institution: UNIVERSITIES[i % UNIVERSITIES.length],
+      qualificationType: scale === 4.0 ? "HND" : "B.Sc.",
+      courseOfStudy: COURSES[i % COURSES.length],
+      cgpa: parseFloat(cgpa),
+      cgpaScale: scale,
+      normalizedCgpa: parseFloat(norm),
+      classRank: classRank,
+      classOfDegree: classTitle,
+      graduationYear: 2020 + (i % 6),
+      yearsExperience: (i % 7),
+      nyscStatus: i % 2 === 0 ? "completed" : "exempted",
+      hasVerifiedCredential: isVerified,
+      published: true,
+      skills: ["Problem Solving", "Communication", "Data Analysis", "SQL", "Teamwork"].slice(0, 2 + (i % 4)),
+      documents: [
+        {
+          id: `doc-${i}-1`,
+          title: `${scale === 4.0 ? 'HND' : 'B.Sc.'} Degree Certificate`,
+          type: "Degree Certificate",
+          status: isVerified ? "verified" : "pending_verification",
+          scanStatus: "clean",
+          uploadedAt: "2026-03-12",
+          fileSize: "2.4 MB"
+        },
+        {
+          id: `doc-${i}-2`,
+          title: `Official Academic Transcript (${scale === 4.0 ? 'HND' : 'B.Sc.'})`,
+          type: "Academic Transcript",
+          status: isVerified ? "verified" : "pending_verification",
+          scanStatus: "clean",
+          uploadedAt: "2026-03-14",
+          fileSize: "4.1 MB"
+        },
+        {
+          id: `doc-${i}-3`,
+          title: `NYSC Discharge Certificate`,
+          type: "NYSC Certificate",
+          status: isVerified ? "verified" : "pending_verification",
+          scanStatus: "clean",
+          uploadedAt: "2026-03-15",
+          fileSize: "1.8 MB"
+        }
+      ],
+      messagesReceived: i === 2 ? [
+        {
+          id: `msg-${i}-1`,
+          sender: "KPMG Nigeria HR",
+          content: "Hello Amina, we reviewed your verified profile and would like to invite you for an interview for our Graduate Trainee Program.",
+          date: "2026-04-16 11:20",
+          replies: []
+        }
+      ] : []
+    });
+  }
+  return cands;
+}
+
+function generate50Employers() {
+  const orgs = [
+    "KPMG Nigeria", "Paystack (Stripe)", "Nestlé Nigeria", "Access Bank Plc", 
+    "MTN Nigeria", "Flutterwave", "PwC Nigeria", "Zenith Bank Plc", 
+    "Guaranty Trust Bank (GTCO)", "Nigerian Breweries", "Unilever Nigeria",
+    "Deloitte Nigeria", "Ernst & Young (EY)", "Interswitch Group", "TotalEnergies NG",
+    "First Bank of Nigeria", "United Bank for Africa (UBA)", "Dangote Group", "Oando Plc", "Seplat Energy",
+    "Stanbic IBTC", "Fidelity Bank", "Wema Bank", "Kuda Microfinance Bank", "Moniepoint",
+    "OPay Nigeria", "PiggyVest", "FairMoney", "Cowrywise", "Jobberman Nigeria",
+    "MainOne (Equinix)", "Airtel Nigeria", "9mobile", "IHS Towers", "Andela",
+    "VFD Group", "Sterling Bank", "Union Bank", "Polaris Bank", "Jaiz Bank",
+    "Heritage Bank", "FCMB", "Cornerstone Insurance", "Leadway Assurance", "AXA Mansard",
+    "NLNG", "ExxonMobil NG", "Chevron Nigeria", "Shell Nigeria", "Cadbury Nigeria"
+  ];
+
+  return orgs.map((name, i) => ({
+    id: `emp-${200 + i}`,
+    orgName: name,
+    email: `recruitment@${name.toLowerCase().replace(/[^a-z0-9]/g, '')}.ng`,
+    industry: i % 4 === 0 ? "Financial Services / Fintech" : i % 4 === 1 ? "Professional Services / Consulting" : i % 4 === 2 ? "FMCG / Manufacturing" : "Energy & Telecommunications",
+    location: NIGERIAN_STATES[i % NIGERIAN_STATES.length],
+    isVerifiedEmployer: i % 5 !== 0
+  }));
+}
+
+// --- LOGO BADGE ---
+function FindMeLogo({ className = "w-9 h-9" }) {
+  return (
+    <div className={`relative flex items-center justify-center rounded-[22%] bg-[#5B63EE] shadow-lg shadow-[#5B63EE]/30 select-none ${className}`}>
+      <span className="font-black text-white text-xl tracking-tighter leading-none pr-1">F</span>
+      <div className="absolute bottom-1.5 right-1.5 w-2.5 h-2.5 rounded-full bg-[#FFDF6D] border border-[#5B63EE]" />
+    </div>
+  );
+}
+
+// --- DIRECT MESSAGING MODAL ---
+function DirectMessagingModal({ candidate, currentUser, onClose, logAudit, setCandidates }) {
+  const [msgText, setMsgText] = useState('');
+
+  const handleSend = (e) => {
+    e.preventDefault();
+    if (!candidate.hasVerifiedCredential) {
+      alert("Messaging Guard: Direct messages can only be delivered to candidates with verified credentials.");
+      return;
+    }
+
+    const newMessage = {
+      id: `msg-${Date.now()}`,
+      sender: currentUser?.name || "Verified Employer",
+      content: msgText,
+      date: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      replies: []
+    };
+
+    setCandidates(prev => prev.map(c => {
+      if (c.id === candidate.id) {
+        return { 
+          ...c, 
+          messagesReceived: [newMessage, ...c.messagesReceived] 
+        };
+      }
+      return c;
+    }));
+
+    logAudit(`Employer (${currentUser?.name})`, "DIRECT_MESSAGE_SENT", `Sent message to verified candidate ${candidate.fullName}`);
+    alert(`Message delivered to ${candidate.fullName}!`);
+    onClose();
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div className="bg-[#121318] border border-[#22242D] w-full max-w-md rounded-2xl p-6 space-y-4 relative shadow-2xl">
+        <button onClick={onClose} className="absolute top-4 right-4 text-slate-400 hover:text-white">
+          <XCircle className="w-5 h-5" />
+        </button>
+        <h3 className="font-bold text-white text-base">Direct Message Candidate</h3>
+        <p className="text-xs text-slate-400">{candidate.fullName} &bull; {candidate.qualificationType} {candidate.courseOfStudy}</p>
+        
+        <form onSubmit={handleSend} className="space-y-4 text-xs">
+          <textarea
+            rows="4"
+            required
+            placeholder="Type your outreach message..."
+            value={msgText}
+            onChange={(e) => setMsgText(e.target.value)}
+            className="w-full bg-[#171922] border border-[#2B2E3D] rounded-xl p-3 text-white text-xs outline-none focus:border-[#5B63EE]"
+          />
+          <button type="submit" className="w-full py-3 bg-[#5B63EE] hover:bg-[#4A52D4] text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all">
+            <Send className="w-4 h-4" /> Send Direct Message
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+const INITIAL_AUDIT_LOGS = [
+  { id: "aud-1", actor: "Employer: KPMG Nigeria", action: "PROFILE_VIEW", target: "Amina Lawal (cand-1002)", time: "2026-04-14 09:15", ip: "102.89.23.11" },
+  { id: "aud-2", actor: "Admin: Tunde (Super)", action: "CREDENTIAL_VERIFY", target: "Ngozi Eze (doc-3-1)", time: "2026-04-13 16:20", ip: "197.210.8.4" }
+];
+
+export default function App() {
+  const [activeRole, setActiveRole] = useState('landing');
+  const [candidates, setCandidates] = useState(generate100Candidates);
+  const [employers, setEmployers] = useState(generate50Employers);
+  const [auditLogs, setAuditLogs] = useState(INITIAL_AUDIT_LOGS);
+
+  // Viewport simulator toggle
+  const [isMobileFrame, setIsMobileFrame] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
+  const [showMobileFilters, setShowMobileFilters] = useState(false);
+
+  const [currentUser, setCurrentUser] = useState({
+    role: 'employer',
+    name: 'KPMG Nigeria',
+    email: 'recruitment@kpmg.ng',
+    isVerifiedEmployer: true,
+    candidateId: 'cand-1002'
+  });
+
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [accessDeniedMessage, setAccessDeniedMessage] = useState(null);
+  const [messagingTarget, setMessagingTarget] = useState(null);
+
+  // Search & Filtering State for Employers
+  const [filterMaxAge, setFilterMaxAge] = useState(45);
+  const [filterRegion, setFilterRegion] = useState('All');
+  const [filterState, setFilterState] = useState('All');
+  const [filterMinCgpa, setFilterMinCgpa] = useState(0.70);
+  const [filterVerifiedOnly, setFilterVerifiedOnly] = useState(false);
+
+  const [candidateReplyText, setCandidateReplyText] = useState('');
+
+  const [adverts] = useState([
+    {
+      id: "adv-1",
+      title: "Graduate Trainee Program 2026 (Digital & Tech)",
+      orgName: "KPMG Nigeria",
+      location: "Lagos / Hybrid",
+      description: "Recruiting top engineering and technology graduates for multi-disciplinary consulting roles.",
+      postedDate: "2026-04-10"
+    },
+    {
+      id: "adv-2",
+      title: "Fintech Software Engineer Trainee",
+      orgName: "Paystack (Stripe)",
+      location: "Lagos State",
+      description: "Intensive 12-month engineering residency program for computer science graduates.",
+      postedDate: "2026-04-14"
+    }
+  ]);
+
+  const [candidateInterests, setCandidateInterests] = useState([]);
+
+  const myCandidate = useMemo(() => {
+    return candidates.find(c => c.id === currentUser.candidateId) || candidates[0];
+  }, [candidates, currentUser.candidateId]);
+
+  const logAudit = (actor, action, target) => {
+    const newEntry = {
+      id: `aud-${Date.now()}`,
+      actor,
+      action,
+      target,
+      time: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      ip: "102.89.34.12"
+    };
+    setAuditLogs(prev => [newEntry, ...prev]);
+  };
+
+  const handleInterest = (advert) => {
+    const existing = candidateInterests.find(i => i.advertId === advert.id && i.candidateId === myCandidate.id);
+    if (existing) {
+      alert(`You have already expressed interest in "${advert.title}". Status: ${existing.status}`);
+      return;
+    }
+
+    const newInterest = {
+      id: `int-${Date.now()}`,
+      advertId: advert.id,
+      advertTitle: advert.title,
+      orgName: advert.orgName,
+      candidateId: myCandidate.id,
+      candidateName: myCandidate.fullName,
+      expressedAt: new Date().toISOString().replace('T', ' ').substring(0, 16),
+      status: 'Pending Review'
+    };
+
+    setCandidateInterests(prev => [newInterest, ...prev]);
+    logAudit(`Candidate (${myCandidate.fullName})`, "EXPRESS_INTEREST", `Expressed interest in advert ${advert.title}`);
+    alert(`Expression of Interest sent to ${advert.orgName}!`);
+  };
+
+  const handleReplyMessage = (msgId) => {
+    if (!candidateReplyText.trim()) return;
+
+    setCandidates(prev => prev.map(c => {
+      if (c.id === myCandidate.id) {
+        return {
+          ...c,
+          messagesReceived: c.messagesReceived.map(m => {
+            if (m.id === msgId) {
+              return {
+                ...m,
+                replies: [...(m.replies || []), {
+                  sender: myCandidate.fullName,
+                  content: candidateReplyText,
+                  date: new Date().toISOString().replace('T', ' ').substring(0, 16)
+                }]
+              };
+            }
+            return m;
+          })
+        };
+      }
+      return c;
+    }));
+
+    setCandidateReplyText('');
+    alert("Reply sent successfully!");
+  };
+
+  const filteredCandidates = useMemo(() => {
+    return candidates.filter(c => {
+      if (c.age > filterMaxAge) return false;
+      if (filterRegion !== 'All' && c.region !== filterRegion) return false;
+      if (filterState !== 'All' && c.currentState !== filterState && !c.openToAnyLocation) return false;
+      if (c.normalizedCgpa < filterMinCgpa) return false;
+      if (filterVerifiedOnly && !c.hasVerifiedCredential) return false;
+      return true;
+    });
+  }, [candidates, filterMaxAge, filterRegion, filterState, filterMinCgpa, filterVerifiedOnly]);
+
+  return (
+    <div className="min-h-screen bg-[#0A0A0C] text-slate-100 font-sans selection:bg-[#5B63EE] selection:text-white border-t-2 border-[#5B63EE]">
+      {/* Top Controller Bar for Viewport Toggle */}
+      <div className="bg-[#121318] border-b border-[#22242D] py-2 px-4 flex items-center justify-between text-xs text-slate-400">
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span className="font-semibold text-white">FindME Live Preview</span>
+          <span className="hidden sm:inline text-[11px] text-slate-500">| React &amp; Tailwind CSS</span>
+        </div>
+        <div className="flex items-center gap-1.5 bg-[#171922] p-1 rounded-xl border border-[#262936]">
+          <button
+            onClick={() => setIsMobileFrame(false)}
+            className={`px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition-all ${
+              !isMobileFrame ? 'bg-[#5B63EE] text-white shadow' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Monitor className="w-3.5 h-3.5" /> Desktop
+          </button>
+          <button
+            onClick={() => setIsMobileFrame(true)}
+            className={`px-2.5 py-1 rounded-lg font-semibold flex items-center gap-1 transition-all ${
+              isMobileFrame ? 'bg-[#5B63EE] text-white shadow' : 'text-slate-400 hover:text-white'
+            }`}
+          >
+            <Smartphone className="w-3.5 h-3.5" /> Mobile View
+          </button>
+        </div>
+      </div>
+
+      {/* Main Responsive Wrapper */}
+      <div className={isMobileFrame ? "max-w-[412px] mx-auto my-6 bg-[#0A0A0C] border-[8px] border-[#1E212D] rounded-[40px] shadow-2xl overflow-hidden min-h-[820px] flex flex-col relative" : "w-full"}>
+        
+        {/* Mobile Header Bar */}
+        {isMobileFrame && (
+          <div className="bg-[#0E0F14] px-6 py-2 flex justify-between items-center text-[11px] font-mono text-slate-400 border-b border-[#1E212D]">
+            <span>9:41</span>
+            <div className="w-20 h-4 bg-black rounded-full flex items-center justify-center gap-1">
+              <div className="w-2 h-2 rounded-full bg-[#5B63EE]"></div>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Wifi className="w-3 h-3 text-white" />
+              <Battery className="w-3 h-3 text-white" />
+            </div>
+          </div>
+        )}
+
+        {/* Navigation Bar */}
+        <header className="sticky top-0 z-40 bg-[#0E0F14]/95 backdrop-blur-md border-b border-[#22242D] px-4 py-3">
+          <div className="max-w-7xl mx-auto flex items-center justify-between gap-2">
+            <div onClick={() => { setActiveRole('landing'); setShowMobileMenu(false); }} className="flex items-center gap-2.5 cursor-pointer group">
+              <FindMeLogo className="w-8 h-8" />
+              <div>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-extrabold text-lg tracking-tight text-white">FindME</span>
+                  <span className="px-1.5 py-0.2 text-[9px] uppercase font-mono bg-[#5B63EE]/10 text-[#5B63EE] border border-[#5B63EE]/30 rounded-full font-semibold">
+                    NDPA
+                  </span>
+                </div>
+                <p className="text-[10px] text-slate-400 hidden sm:block">Graduate &amp; Experienced Talent Directory</p>
+              </div>
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className="hidden lg:flex items-center gap-3">
+              <nav className="flex items-center bg-[#161821] p-1.5 rounded-xl border border-[#262936]">
+                <button
+                  onClick={() => { setAccessDeniedMessage(null); setActiveRole('landing'); }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    activeRole === 'landing' ? 'bg-[#5B63EE] text-white shadow-md' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Home className="w-3.5 h-3.5" /> Home
+                </button>
+
+                <button
+                  onClick={() => {
+                    setAccessDeniedMessage(null);
+                    setCurrentUser(prev => ({ ...prev, role: 'candidate' }));
+                    setActiveRole('candidate');
+                  }}
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    activeRole === 'candidate' ? 'bg-[#5B63EE] text-white shadow-md' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <User className="w-3.5 h-3.5" /> Candidate Profile
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (currentUser.role === 'candidate') {
+                      setAccessDeniedMessage("HTTP 403 Forbidden: Candidate accounts cannot access the Employer Sourcing Portal.");
+                    } else {
+                      setAccessDeniedMessage(null);
+                      setActiveRole('employer');
+                    }
+                  }}
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    activeRole === 'employer' ? 'bg-[#5B63EE] text-white shadow-md' : currentUser.role === 'candidate' ? 'text-slate-600 cursor-not-allowed opacity-60' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <Building2 className="w-3.5 h-3.5" /> Employer Portal
+                  {currentUser.role === 'candidate' && <Lock className="w-3 h-3 text-rose-500" />}
+                </button>
+
+                <button
+                  onClick={() => {
+                    if (currentUser.role !== 'admin') {
+                      setAccessDeniedMessage("HTTP 403 Forbidden: Only Administrator accounts can access the Admin Console.");
+                    } else {
+                      setAccessDeniedMessage(null);
+                      setActiveRole('admin');
+                    }
+                  }}
+                  className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    activeRole === 'admin' ? 'bg-[#5B63EE] text-white shadow-md' : currentUser.role !== 'admin' ? 'text-slate-600 cursor-not-allowed opacity-60' : 'text-slate-400 hover:text-white'
+                  }`}
+                >
+                  <ShieldCheck className="w-3.5 h-3.5" /> Admin Console
+                  {currentUser.role !== 'admin' && <Lock className="w-3 h-3 text-rose-500" />}
+                </button>
+              </nav>
+
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="px-3 py-2 bg-[#1E212D] hover:bg-[#282C3D] text-white text-xs font-semibold rounded-xl border border-[#303446] flex items-center gap-1.5 transition-all"
+              >
+                <LogIn className="w-3.5 h-3.5 text-[#5B63EE]" /> Switch Role
+              </button>
+            </div>
+
+            {/* Mobile Nav Drawer Button */}
+            <div className="flex lg:hidden items-center gap-2">
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="px-2.5 py-1.5 bg-[#1E212D] text-white text-[11px] font-semibold rounded-lg border border-[#303446]"
+              >
+                Role
+              </button>
+              <button
+                onClick={() => setShowMobileMenu(!showMobileMenu)}
+                className="p-2 bg-[#171922] border border-[#2B2E3D] rounded-xl text-slate-300 hover:text-white"
+              >
+                {showMobileMenu ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile Dropdown Menu Drawer */}
+          {showMobileMenu && (
+            <div className="lg:hidden pt-3 pb-2 border-t border-[#22242D] mt-3 space-y-2">
+              <button
+                onClick={() => { setAccessDeniedMessage(null); setActiveRole('landing'); setShowMobileMenu(false); }}
+                className={`w-full flex items-center gap-2 p-2.5 rounded-xl text-xs font-bold transition-all ${
+                  activeRole === 'landing' ? 'bg-[#5B63EE] text-white' : 'bg-[#171922] text-slate-300'
+                }`}
+              >
+                <Home className="w-4 h-4" /> Home Landing Page
+              </button>
+
+              <button
+                onClick={() => {
+                  setAccessDeniedMessage(null);
+                  setCurrentUser(prev => ({ ...prev, role: 'candidate' }));
+                  setActiveRole('candidate');
+                  setShowMobileMenu(false);
+                }}
+                className={`w-full flex items-center gap-2 p-2.5 rounded-xl text-xs font-bold transition-all ${
+                  activeRole === 'candidate' ? 'bg-[#5B63EE] text-white' : 'bg-[#171922] text-slate-300'
+                }`}
+              >
+                <User className="w-4 h-4" /> Candidate Portal
+              </button>
+
+              <button
+                onClick={() => {
+                  if (currentUser.role === 'candidate') {
+                    setAccessDeniedMessage("HTTP 403 Forbidden: Candidate accounts cannot access the Employer Sourcing Portal.");
+                  } else {
+                    setAccessDeniedMessage(null);
+                    setActiveRole('employer');
+                  }
+                  setShowMobileMenu(false);
+                }}
+                className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-bold transition-all ${
+                  activeRole === 'employer' ? 'bg-[#5B63EE] text-white' : 'bg-[#171922] text-slate-300'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4" /> Employer Portal
+                </span>
+                {currentUser.role === 'candidate' && <Lock className="w-3.5 h-3.5 text-rose-500" />}
+              </button>
+
+              <button
+                onClick={() => {
+                  if (currentUser.role !== 'admin') {
+                    setAccessDeniedMessage("HTTP 403 Forbidden: Only Administrator accounts can access the Admin Console.");
+                  } else {
+                    setAccessDeniedMessage(null);
+                    setActiveRole('admin');
+                  }
+                  setShowMobileMenu(false);
+                }}
+                className={`w-full flex items-center justify-between p-2.5 rounded-xl text-xs font-bold transition-all ${
+                  activeRole === 'admin' ? 'bg-[#5B63EE] text-white' : 'bg-[#171922] text-slate-300'
+                }`}
+              >
+                <span className="flex items-center gap-2">
+                  <ShieldCheck className="w-4 h-4" /> Admin Console
+                </span>
+                {currentUser.role !== 'admin' && <Lock className="w-3.5 h-3.5 text-rose-500" />}
+              </button>
+            </div>
+          )}
+        </header>
+
+        {/* Content Container */}
+        <main className="max-w-7xl mx-auto px-4 lg:px-8 py-6 space-y-6 flex-1">
+          {accessDeniedMessage && (
+            <div className="p-4 bg-rose-500/10 border border-rose-500/30 rounded-2xl flex items-center justify-between text-rose-400 text-xs shadow-lg">
+              <div className="flex items-center gap-2">
+                <AlertOctagon className="w-4 h-4 shrink-0" />
+                <span className="font-semibold">{accessDeniedMessage}</span>
+              </div>
+              <button onClick={() => setAccessDeniedMessage(null)} className="underline hover:text-white shrink-0 ml-2">Dismiss</button>
+            </div>
+          )}
+
+          {/* LANDING PAGE VIEW */}
+          {activeRole === 'landing' && (
+            <div className="space-y-10 py-4 text-center max-w-4xl mx-auto">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#5B63EE]/10 border border-[#5B63EE]/30 text-[#5B63EE] text-xs font-semibold">
+                <Sparkles className="w-3.5 h-3.5" /> Vacancy-Free Talent Directory Architecture
+              </div>
+              
+              <h1 className="text-3xl md:text-5xl font-extrabold text-white tracking-tight leading-tight">
+                Find Top Nigerian Talent <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#5B63EE] via-[#7B82F6] to-[#FFDF6D]">
+                  Without Publishing an Advert
+                </span>
+              </h1>
+              
+              <p className="text-slate-400 text-xs md:text-sm max-w-2xl mx-auto leading-relaxed">
+                Instantly search 100+ vetted candidate profiles with normalized CGPA indices, verified credentials, age filters, and geopolitical regional targeting.
+              </p>
+
+              <div className="flex flex-col sm:flex-row justify-center gap-3">
+                <button
+                  onClick={() => { setCurrentUser(prev => ({ ...prev, role: 'employer' })); setActiveRole('employer'); }}
+                  className="w-full sm:w-auto px-6 py-3.5 bg-[#5B63EE] hover:bg-[#4A52D4] text-white font-bold text-xs md:text-sm rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-[#5B63EE]/25 transition-all"
+                >
+                  <Building2 className="w-4 h-4" /> Search Candidate Directory
+                </button>
+                <button
+                  onClick={() => { setCurrentUser(prev => ({ ...prev, role: 'candidate' })); setActiveRole('candidate'); }}
+                  className="w-full sm:w-auto px-6 py-3.5 bg-[#171922] hover:bg-[#202330] text-white font-bold text-xs md:text-sm rounded-xl border border-[#2B2E3D] transition-all"
+                >
+                  Enter Candidate Portal
+                </button>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-left pt-4">
+                <div className="p-3 bg-[#121318] border border-[#22242D] rounded-xl">
+                  <p className="text-xl font-black text-white">100+</p>
+                  <p className="text-[11px] text-slate-400">Vetted Candidates</p>
+                </div>
+                <div className="p-3 bg-[#121318] border border-[#22242D] rounded-xl">
+                  <p className="text-xl font-black text-[#5B63EE]">50</p>
+                  <p className="text-[11px] text-slate-400">Employers</p>
+                </div>
+                <div className="p-3 bg-[#121318] border border-[#22242D] rounded-xl">
+                  <p className="text-xl font-black text-[#FFDF6D]">36+</p>
+                  <p className="text-[11px] text-slate-400">States Covered</p>
+                </div>
+                <div className="p-3 bg-[#121318] border border-[#22242D] rounded-xl">
+                  <p className="text-xl font-black text-emerald-400">100%</p>
+                  <p className="text-[11px] text-slate-400">NDPA Compliant</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* CANDIDATE PORTAL VIEW */}
+          {activeRole === 'candidate' && (
+            <div className="space-y-6">
+              <div className="bg-[#121318] p-5 rounded-2xl border border-[#22242D] space-y-6">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-14 h-14 rounded-2xl bg-[#171922] border border-[#2B2E3D] flex items-center justify-center font-bold text-white text-xl shadow-inner shrink-0">
+                      {myCandidate.fullName.charAt(0)}
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h2 className="text-lg font-bold text-white">{myCandidate.fullName}</h2>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold uppercase bg-[#5B63EE]/10 text-[#5B63EE] border border-[#5B63EE]/30">
+                          Age {myCandidate.age}
+                        </span>
+                      </div>
+                      <p className="text-xs text-slate-400">{myCandidate.qualificationType} {myCandidate.courseOfStudy}</p>
+                      <p className="text-[11px] text-slate-500">{myCandidate.institution}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:items-end gap-1 w-full sm:w-auto">
+                    <span className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase text-center ${
+                      myCandidate.hasVerifiedCredential ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-amber-500/10 text-amber-400 border border-amber-500/30'
+                    }`}>
+                      {myCandidate.hasVerifiedCredential ? '✓ Verified Credentials' : '⏳ Pending Verification'}
+                    </span>
+                    <span className="text-[11px] text-[#FFDF6D] font-mono">
+                      Norm. Index: {myCandidate.normalizedCgpa} ({myCandidate.classOfDegree})
+                    </span>
+                  </div>
+                </div>
+
+                {/* Credential Vault */}
+                <div className="space-y-3 pt-4 border-t border-[#22242D]">
+                  <h3 className="font-bold text-white text-xs sm:text-sm flex items-center gap-2">
+                    <FileCheck className="w-4 h-4 text-[#5B63EE]" /> Credential Verification Vault
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
+                    {myCandidate.documents.map(d => (
+                      <div key={d.id} className="p-3 bg-[#171922] rounded-xl flex flex-col justify-between text-xs border border-[#252836] space-y-2">
+                        <span className="font-bold text-white">{d.title}</span>
+                        <div className="flex items-center justify-between text-[10px]">
+                          <span className="text-slate-400">ClamAV: <span className="text-emerald-400 font-mono">Clean</span></span>
+                          <span className="text-emerald-400 uppercase font-mono">{d.status}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Received Messages */}
+                <div className="space-y-3 pt-4 border-t border-[#22242D]">
+                  <h3 className="font-bold text-white text-xs sm:text-sm flex items-center gap-2">
+                    <MessageSquare className="w-4 h-4 text-[#5B63EE]" /> Received Messages from Employers
+                  </h3>
+                  {myCandidate.messagesReceived.length === 0 ? (
+                    <p className="text-xs text-slate-500 italic">No messages received yet.</p>
+                  ) : (
+                    myCandidate.messagesReceived.map(msg => (
+                      <div key={msg.id} className="p-3.5 bg-[#171922] border border-[#252836] rounded-xl space-y-2.5">
+                        <div className="flex items-center justify-between">
+                          <span className="font-bold text-white text-xs">{msg.sender}</span>
+                          <span className="text-[10px] text-slate-400">{msg.date}</span>
+                        </div>
+                        <p className="text-xs text-slate-300 leading-relaxed">{msg.content}</p>
+
+                        {msg.replies && msg.replies.length > 0 && (
+                          <div className="space-y-1.5 pt-2 pl-3 border-l-2 border-[#5B63EE]">
+                            {msg.replies.map((r, ri) => (
+                              <div key={ri} className="text-xs">
+                                <span className="font-bold text-[#FFDF6D]">{r.sender}: </span>
+                                <span className="text-slate-300">{r.content}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        <div className="pt-2 flex flex-col sm:flex-row gap-2">
+                          <input
+                            type="text"
+                            placeholder="Type a reply..."
+                            value={candidateReplyText}
+                            onChange={(e) => setCandidateReplyText(e.target.value)}
+                            className="flex-1 bg-[#0A0A0C] border border-[#2B2E3D] rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-[#5B63EE]"
+                          />
+                          <button
+                            onClick={() => handleReplyMessage(msg.id)}
+                            className="px-3 py-1.5 bg-[#5B63EE] text-white font-bold text-xs rounded-lg flex items-center justify-center gap-1 hover:bg-[#4A52D4]"
+                          >
+                            <Send className="w-3 h-3" /> Reply
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Active Job Adverts */}
+              <div className="bg-[#121318] p-5 rounded-2xl border border-[#22242D] space-y-4">
+                <h3 className="font-bold text-white text-xs sm:text-sm">Active Employer Job Adverts</h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {adverts.map(adv => (
+                    <div key={adv.id} className="p-4 bg-[#171922] border border-[#252836] rounded-xl space-y-2">
+                      <h4 className="font-bold text-white text-xs sm:text-sm">{adv.title}</h4>
+                      <p className="text-xs text-slate-400">{adv.orgName} &bull; {adv.location}</p>
+                      <p className="text-xs text-slate-300 line-clamp-2">{adv.description}</p>
+                      <button
+                        onClick={() => handleInterest(adv)}
+                        className="mt-2 w-full py-2 bg-[#5B63EE]/10 border border-[#5B63EE]/30 hover:bg-[#5B63EE] text-[#5B63EE] hover:text-white font-bold text-xs rounded-lg transition-all flex items-center justify-center gap-1.5"
+                      >
+                        <Heart className="w-3.5 h-3.5" /> I'm Interested
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* EMPLOYER SOURCING PORTAL VIEW */}
+          {activeRole === 'employer' && currentUser.role !== 'candidate' && (
+            <div className="space-y-6">
+              <div className="bg-[#121318] p-5 rounded-2xl border border-[#22242D] space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-base sm:text-lg font-bold text-white">{currentUser.name} Talent Sourcing</h2>
+                    <p className="text-xs text-slate-400">100 Vetted Candidates with CGPA &amp; Region Filters.</p>
+                  </div>
+                  <span className="px-2.5 py-1 bg-emerald-500/10 text-emerald-400 rounded-full text-[11px] font-semibold border border-emerald-500/30 self-start sm:self-auto">
+                    ✓ Verified Account
+                  </span>
+                </div>
+
+                {/* Mobile Filter Drawer Control */}
+                <div className="md:hidden flex justify-between items-center pt-2 border-t border-[#22242D]">
+                  <span className="text-xs text-slate-400">Found <strong className="text-white">{filteredCandidates.length}</strong> profiles</span>
+                  <button
+                    onClick={() => setShowMobileFilters(!showMobileFilters)}
+                    className="px-3 py-1.5 bg-[#171922] border border-[#2B2E3D] rounded-xl text-xs font-bold text-slate-300 flex items-center gap-1.5"
+                  >
+                    <Filter className="w-3.5 h-3.5" /> Filters
+                  </button>
+                </div>
+
+                {/* Filters Grid */}
+                <div className={`grid grid-cols-1 md:grid-cols-4 gap-4 pt-3 border-t border-[#22242D] ${showMobileFilters ? 'block' : 'hidden md:grid'}`}>
+                  <div>
+                    <label className="text-[11px] text-slate-400 font-bold block mb-1">Max Age: {filterMaxAge} yrs</label>
+                    <input
+                      type="range"
+                      min="21"
+                      max="45"
+                      value={filterMaxAge}
+                      onChange={(e) => setFilterMaxAge(parseInt(e.target.value))}
+                      className="w-full accent-[#5B63EE]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] text-slate-400 font-bold block mb-1">Geopolitical Region</label>
+                    <select
+                      value={filterRegion}
+                      onChange={(e) => setFilterRegion(e.target.value)}
+                      className="w-full bg-[#171922] border border-[#2B2E3D] rounded-xl p-2 text-xs text-white outline-none focus:border-[#5B63EE]"
+                    >
+                      <option value="All">All Regions</option>
+                      {Object.keys(GEOPOLITICAL_REGIONS).map(r => <option key={r} value={r}>{r}</option>)}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[11px] text-slate-400 font-bold block mb-1">State Filter</label>
+                    <select
+                      value={filterState}
+                      onChange={(e) => setFilterState(e.target.value)}
+                      className="w-full bg-[#171922] border border-[#2B2E3D] rounded-xl p-2 text-xs text-white outline-none focus:border-[#5B63EE]"
+                    >
+                      <option value="All">All States (Inc. Open to Any)</option>
+                      {NIGERIAN_STATES.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                  </div>
+
+                  <div className="flex items-center gap-2 pt-2 md:pt-4">
+                    <input
+                      type="checkbox"
+                      id="verifiedOnly"
+                      checked={filterVerifiedOnly}
+                      onChange={(e) => setFilterVerifiedOnly(e.target.checked)}
+                      className="accent-[#5B63EE] w-4 h-4"
+                    />
+                    <label htmlFor="verifiedOnly" className="text-xs text-white font-bold cursor-pointer">
+                      Verified Credentials Only
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {/* Candidate Search Results */}
+              <div className="space-y-3">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                  {filteredCandidates.slice(0, 10).map(c => (
+                    <div key={c.id} className="bg-[#121318] p-4 rounded-2xl border border-[#22242D] space-y-3 hover:border-[#5B63EE]/50 transition-all">
+                      <div className="flex items-start justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-xl bg-[#171922] border border-[#2B2E3D] flex items-center justify-center font-bold text-white text-base shrink-0">
+                            {c.fullName.charAt(0)}
+                          </div>
+                          <div>
+                            <h4 className="font-bold text-white text-xs sm:text-sm">{c.fullName}</h4>
+                            <p className="text-[11px] text-slate-400">{c.qualificationType} {c.courseOfStudy} &bull; Age {c.age}</p>
+                            <p className="text-[10px] text-slate-500">{c.institution}</p>
+                          </div>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded text-[9px] font-mono font-bold uppercase shrink-0 ${
+                          c.hasVerifiedCredential ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30' : 'bg-slate-800 text-slate-500'
+                        }`}>
+                          {c.hasVerifiedCredential ? 'Verified' : 'Unverified'}
+                        </span>
+                      </div>
+
+                      {/* Criteria Met / Not Met Chips */}
+                      <div className="flex flex-wrap gap-1 text-[9px]">
+                        <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          ✓ Age ({c.age})
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          ✓ Region ({c.region})
+                        </span>
+                        <span className="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                          ✓ CGPA ({c.normalizedCgpa})
+                        </span>
+                      </div>
+
+                      <button
+                        onClick={() => setMessagingTarget(c)}
+                        disabled={!c.hasVerifiedCredential}
+                        className={`w-full py-2 font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-all ${
+                          c.hasVerifiedCredential 
+                            ? 'bg-[#5B63EE] hover:bg-[#4A52D4] text-white shadow' 
+                            : 'bg-slate-800 text-slate-500 cursor-not-allowed'
+                        }`}
+                      >
+                        <Send className="w-3.5 h-3.5" /> Direct Message
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ADMIN CONSOLE VIEW */}
+          {activeRole === 'admin' && currentUser.role === 'admin' && (
+            <div className="space-y-6">
+              <div className="bg-[#121318] p-5 rounded-2xl border border-[#22242D] space-y-4">
+                <h2 className="text-base sm:text-xl font-bold text-white flex items-center gap-2">
+                  <ShieldCheck className="w-5 h-5 text-[#5B63EE]" /> Admin Console
+                </h2>
+                <p className="text-xs text-slate-400">Credential Verification Queue, Employer Management &amp; Audit Logs.</p>
+
+                <div className="space-y-2 pt-3 border-t border-[#22242D]">
+                  <h3 className="font-bold text-white text-[11px] uppercase tracking-wider text-slate-400">Append-Only NDPA Privacy Audit Log</h3>
+                  <div className="space-y-1.5 font-mono text-[10px] max-h-60 overflow-y-auto">
+                    {auditLogs.map(a => (
+                      <div key={a.id} className="p-2 bg-[#171922] rounded-lg border border-[#252836] flex flex-col sm:flex-row justify-between gap-1">
+                        <span><strong className="text-[#5B63EE]">[{a.time}]</strong> {a.actor} &rarr; {a.action}</span>
+                        <span className="text-slate-500">{a.target}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </main>
+
+        {/* Mobile View Sticky Bottom Navigation */}
+        <nav className="sticky bottom-0 z-40 bg-[#0E0F14]/95 backdrop-blur-md border-t border-[#22242D] px-3 py-2 flex items-center justify-around text-[10px] text-slate-400">
+          <button
+            onClick={() => { setAccessDeniedMessage(null); setActiveRole('landing'); }}
+            className={`flex flex-col items-center gap-1 font-semibold ${activeRole === 'landing' ? 'text-[#5B63EE]' : 'hover:text-white'}`}
+          >
+            <Home className="w-4 h-4" /> Home
+          </button>
+          <button
+            onClick={() => { setAccessDeniedMessage(null); setCurrentUser(prev => ({ ...prev, role: 'candidate' })); setActiveRole('candidate'); }}
+            className={`flex flex-col items-center gap-1 font-semibold ${activeRole === 'candidate' ? 'text-[#5B63EE]' : 'hover:text-white'}`}
+          >
+            <User className="w-4 h-4" /> Candidate
+          </button>
+          <button
+            onClick={() => {
+              if (currentUser.role === 'candidate') {
+                setAccessDeniedMessage("HTTP 403 Forbidden: Candidate accounts cannot access Employer Portal.");
+              } else {
+                setAccessDeniedMessage(null);
+                setActiveRole('employer');
+              }
+            }}
+            className={`flex flex-col items-center gap-1 font-semibold ${activeRole === 'employer' ? 'text-[#5B63EE]' : 'hover:text-white'}`}
+          >
+            <Building2 className="w-4 h-4" /> Employer
+          </button>
+          <button
+            onClick={() => {
+              if (currentUser.role !== 'admin') {
+                setAccessDeniedMessage("HTTP 403 Forbidden: Only Admin accounts can access Console.");
+              } else {
+                setAccessDeniedMessage(null);
+                setActiveRole('admin');
+              }
+            }}
+            className={`flex flex-col items-center gap-1 font-semibold ${activeRole === 'admin' ? 'text-[#5B63EE]' : 'hover:text-white'}`}
+          >
+            <ShieldCheck className="w-4 h-4" /> Admin
+          </button>
+        </nav>
+
+      </div>
+
+      {/* Auth Modal */}
+      {showAuthModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <div className="bg-[#121318] border border-[#22242D] w-full max-w-md rounded-2xl p-5 space-y-4 shadow-2xl">
+            <h3 className="font-bold text-white text-base">Select Portal Role</h3>
+            <div className="space-y-2">
+              <button onClick={() => { setCurrentUser({ role: 'candidate', candidateId: candidates[0].id }); setActiveRole('candidate'); setShowAuthModal(false); }} className="w-full p-3 bg-[#171922] hover:bg-[#202330] text-left text-xs font-bold text-white rounded-xl">
+                Candidate Portal
+              </button>
+              <button onClick={() => { setCurrentUser({ role: 'employer', name: employers[0].orgName }); setActiveRole('employer'); setShowAuthModal(false); }} className="w-full p-3 bg-[#171922] hover:bg-[#202330] text-left text-xs font-bold text-white rounded-xl">
+                Employer Portal ({employers[0].orgName})
+              </button>
+              <button onClick={() => { setCurrentUser({ role: 'admin', name: 'Super Admin Tunde' }); setActiveRole('admin'); setShowAuthModal(false); }} className="w-full p-3 bg-[#171922] hover:bg-[#202330] text-left text-xs font-bold text-[#5B63EE] rounded-xl">
+                Administrator Console
+              </button>
+            </div>
+            <button onClick={() => setShowAuthModal(false)} className="w-full py-2 text-xs text-slate-400 hover:text-white">Cancel</button>
+          </div>
+        </div>
+      )}
+
+      {/* Direct Messaging Modal */}
+      {messagingTarget && (
+        <DirectMessagingModal
+          candidate={messagingTarget}
+          currentUser={currentUser}
+          onClose={() => setMessagingTarget(null)}
+          logAudit={logAudit}
+          setCandidates={setCandidates}
+        />
+      )}
+    </div>
+  );
+}
